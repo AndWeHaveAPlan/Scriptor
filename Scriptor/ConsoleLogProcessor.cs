@@ -69,9 +69,6 @@ namespace Scriptor
 
         private static void ProcessLogQueue(object state)
         {
-            //var consoleLogger = (ConsoleLogProcessor)state;
-            //consoleLogger.ProcessLogQueue();
-
             foreach (var message in _messageQueue.GetConsumingEnumerable())
             {
                 WriteMessage(message);
