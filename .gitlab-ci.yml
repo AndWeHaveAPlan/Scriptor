@@ -8,7 +8,7 @@ package:
   before_script:
     - echo "<?xml version='1.0' encoding='utf-8'?><configuration><packageSources><add key='ADOFeed' value='$ADO_NUGET_URL' /></packageSources><packageSourceCredentials><ADOFeed><add key='Username' value='$ADO_USER' /><add key='ClearTextPassword' value='$ADO_ACCESS_TOKEN' /></ADOFeed></packageSourceCredentials></configuration>" > NuGet.Config
   script:
-    - dotnet restore Scriptor\Scriptor.csproj
+    - dotnet restore Scriptor/Scriptor.csproj
     - cd Scriptor
     - dotnet build Scriptor.csproj -c Release
     - dotnet pack -c Release --no-build --no-restore -o ./app
