@@ -123,10 +123,6 @@ namespace Scriptor
                 logMessage.Message = message;
             }
 
-
-            // Example:
-            // System.InvalidOperationException
-            //    at Namespace.Class.Function() in File:line X
             if (exception != null)
             {
                 // exception message
