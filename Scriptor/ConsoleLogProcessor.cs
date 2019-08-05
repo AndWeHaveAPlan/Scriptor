@@ -6,7 +6,7 @@ namespace Scriptor
 {
     internal class ConsoleLogProcessor : IDisposable
     {
-        private static readonly BlockingCollection<LogMessage> _messageQueue = new BlockingCollection<LogMessage>();
+        private static readonly BlockingCollection<QueueItem[]> _messageQueue = new BlockingCollection<QueueItem[]>();
 
         private static readonly Task _outputTask;
 
@@ -25,7 +25,7 @@ namespace Scriptor
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public virtual void EnqueueMessage(LogMessage message)
+        public virtual void EnqueueMessage(QueueItem[] message)
         {
             if (!_messageQueue.IsAddingCompleted)
             {
@@ -34,29 +34,30 @@ namespace Scriptor
                     _messageQueue.Add(message);
                     return;
                 }
-                catch (InvalidOperationException) { }
+                catch (InvalidOperationException)
+                {
+
+                }
             }
 
             // Adding is completed so just log the message
             WriteMessage(message);
         }
 
-        private static void WriteMessage(LogMessage message)
+        private static void WriteMessage(QueueItem[] message)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(message.Header);
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(message.Scope);
-
-            Console.ResetColor();
-            Console.WriteLine(message.Message);
-
-            if (message.Exception != null)
+            foreach (var queueItem in message)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(message.Exception);
+                if (queueItem.ForegroundColor.HasValue)
+                    Console.ForegroundColor = queueItem.ForegroundColor.Value;
+
+                if (queueItem.BackgroundColor.HasValue)
+                    Console.BackgroundColor = queueItem.BackgroundColor.Value;
+
+                Console.Write(queueItem.String);
+                Console.ResetColor();
             }
+            Console.WriteLine();
         }
 
         private void ProcessLogQueue()
@@ -85,5 +86,12 @@ namespace Scriptor
             catch (TaskCanceledException) { }
             catch (AggregateException ex) when (ex.InnerExceptions.Count == 1 && ex.InnerExceptions[0] is TaskCanceledException) { }
         }
+    }
+
+    public struct QueueItem
+    {
+        public ConsoleColor? ForegroundColor;
+        public ConsoleColor? BackgroundColor;
+        public string String;
     }
 }
