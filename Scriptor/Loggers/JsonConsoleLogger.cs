@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Scriptor.Loggers
@@ -30,7 +25,7 @@ namespace Scriptor.Loggers
             {
                 foreach (var (key, value) in message.AuxData)
                 {
-                    jObject.Add($"aux_{key}", value);
+                    jObject.Add(jObject.ContainsKey(key) ? $"aux_{key}" : key, value);
                 }
             }
 
