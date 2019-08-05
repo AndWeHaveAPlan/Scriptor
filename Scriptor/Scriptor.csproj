@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>0.2.1</Version>
+    <Version>0.2.2</Version>
     <Description>Simple logging library</Description>
     <PackageReleaseNotes>add json logger</PackageReleaseNotes>
   </PropertyGroup>
