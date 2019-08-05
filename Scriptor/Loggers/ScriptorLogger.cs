@@ -1,42 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Scriptor
+namespace Scriptor.Loggers
 {
-    public class ColoredConsoleLogger : ILogger
+    public abstract class ScriptorLogger : ILogger
     {
-        private readonly string _requestId;
-
-        private readonly ConsoleLogProcessor _queueProcessor;
+        private static readonly ConsoleLogProcessor QueueProcessor;
         private Func<string, LogLevel, bool> _filter;
 
-        [ThreadStatic]
-        private static StringBuilder _logBuilder;
-
-        protected virtual string DateTimeFormat => "yyyy-MM-dd HH:mm:ss.fff";
+        protected bool UseRfcLevel;
 
         /// <summary>
         /// 
         /// </summary>
-        static ColoredConsoleLogger()
+        protected Func<Dictionary<string, string>> Inject;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected Func<LogMessage, QueueItem[]> Compose;
+
+        static ScriptorLogger()
         {
+            QueueProcessor = new ConsoleLogProcessor();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="includeScopes"></param>
-        /// <param name="requestId"></param>
-        public ColoredConsoleLogger(string name, bool includeScopes, string requestId)
+        protected ScriptorLogger(string name, bool includeScopes)
         {
-            _requestId = requestId;
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            Filter = ((category, logLevel) => true);
+            Filter = (category, logLevel) => true;
             IncludeScopes = includeScopes;
 
-            _queueProcessor = new ConsoleLogProcessor();
+            Compose = ComposeInternal;
         }
 
         /// <summary>
@@ -97,56 +94,54 @@ namespace Scriptor
         /// <param name="exception"></param>
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
-            var logBuilder = _logBuilder;
-            _logBuilder = null;
-
-            var logMessage = new LogMessage();
-
-            if (logBuilder == null)
+            var logMessage = new LogMessage
             {
-                logBuilder = new StringBuilder();
-            }
+                Timestamp = DateTime.UtcNow,
+                LevelString = GetLogLevelString(logLevel),
+                Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
+                Message = message,
+                Exception = exception?.ToString(),
+                AuxData = Inject?.Invoke()
+            };
 
-            var logLevelString = string.Empty;
+            if (IncludeScopes)
+                logMessage.Scope = GetScopeInformation();
 
-            if (!string.IsNullOrEmpty(message))
-            {
-                logLevelString = GetLogLevelString(logLevel);
+            var queueItem = Compose(logMessage);
 
-                logMessage.Header = _requestId == null
-                    ? $"[ {logLevelString} | {DateTime.UtcNow.ToString(DateTimeFormat)}]"
-                    : $"[ {logLevelString} | {DateTime.UtcNow.ToString(DateTimeFormat)} | {_requestId} ]";
+            QueueProcessor.EnqueueMessage(queueItem);
+        }
 
-                if (IncludeScopes)
-                    logMessage.Scope = GetScopeInformation();
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        protected abstract QueueItem[] ComposeInternal(LogMessage message);
 
-                logMessage.Message = message;
-            }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="composeFunc"></param>
+        public void UseComposer(Func<LogMessage, QueueItem[]> composeFunc)
+        {
+            Compose = composeFunc;
+        }
 
-            if (exception != null)
-            {
-                // exception message
-                logMessage.Exception = exception.ToString();
-            }
+        public void UseRfcLogLevel()
+        {
+            UseRfcLevel = true;
+        }
 
-            var hasLevel = !string.IsNullOrEmpty(logLevelString);
-            // Queue log message
-            _queueProcessor.EnqueueMessage(logMessage);
-
-
-            logBuilder.Clear();
-            if (logBuilder.Capacity > 1024)
-            {
-                logBuilder.Capacity = 1024;
-            }
-            _logBuilder = logBuilder;
+        public void InjectData(Func<Dictionary<string, string>> injectFunc)
+        {
+            Inject = injectFunc;
         }
 
         public bool IsEnabled(LogLevel logLevel)
         {
             return Filter(Name, logLevel);
         }
-
 
         public IDisposable BeginScope<TState>(TState state)
         {
@@ -165,7 +160,7 @@ namespace Scriptor
 
             while (current != null)
             {
-                stringBuilder.Append("=> ");
+                stringBuilder.Append("=>");
                 stringBuilder.Append(current);
                 current = current.Parent;
             }
@@ -189,6 +184,27 @@ namespace Scriptor
                     return "ERROR";
                 case LogLevel.Critical:
                     return "CRITICAL";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logLevel));
+            }
+        }
+
+        private static int GetLogLevelRfcNumber(LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Trace:
+                    return 7;
+                case LogLevel.Debug:
+                    return 7;
+                case LogLevel.Information:
+                    return 6;
+                case LogLevel.Warning:
+                    return 4;
+                case LogLevel.Error:
+                    return 3;
+                case LogLevel.Critical:
+                    return 2;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel));
             }
