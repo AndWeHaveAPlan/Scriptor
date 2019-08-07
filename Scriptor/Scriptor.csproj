@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>0.2.3</Version>
+    <Version>0.2.4</Version>
     <Description>Simple logging library</Description>
-    <PackageReleaseNotes>add json logger</PackageReleaseNotes>
+    <PackageReleaseNotes>use proper IHttpContextAccessor injection</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
