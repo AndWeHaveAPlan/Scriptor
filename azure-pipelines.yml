@@ -38,15 +38,8 @@ steps:
     custom: 'pack'
     arguments: '-c Release --no-build --no-restore -o ./pkg'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet push'
-  inputs:
-    command: 'push'
-    packagesToPush: 'Scriptor*/pkg/*.nupkg'
-    nuGetFeedType: 'external'
-    publishFeedCredentials: 'nuget.org'
-
 - task: NuGetCommand@2
+  displayName: 'nuget push'
   inputs:
     command: 'push'
     packagesToPush: 'Scriptor*/pkg/*.nupkg'
