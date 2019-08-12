@@ -20,17 +20,13 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: |
-      Scriptor\Scriptor.csproj
-      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
+    projects: 'Scriptor*\Scriptor*.csproj'
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: |
-      Scriptor\Scriptor.csproj
-      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
+    projects: 'Scriptor*\Scriptor*.csproj'
     arguments: '--no-restore'
 
 - task: DotNetCoreCLI@2
