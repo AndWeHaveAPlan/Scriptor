@@ -36,12 +36,12 @@ steps:
     command: 'custom'
     projects: '**/*.csproj'
     custom: 'pack'
-    arguments: '-c Release --no-build --no-restore -o ./app'
+    arguments: '-c Release --no-build --no-restore -o ./pkg'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet push'
   inputs:
     command: 'push'
-    packagesToPush: './app/*.nupkg'
+    packagesToPush: 'Scriptor*/pkg/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
