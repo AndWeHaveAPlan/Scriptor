@@ -20,22 +20,30 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: 'Scriptor\Scriptor.csproj;Scriptor.AspExtensions\Scriptor.AspExtensions.csproj'
+    projects: |
+      Scriptor\Scriptor.csproj
+      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: 'Scriptor\Scriptor.csproj;Scriptor.AspExtensions\Scriptor.AspExtensions.csproj'
-    arguments: '--no-restore'    
+    projects: |
+      Scriptor\Scriptor.csproj
+      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
+    arguments: '--no-restore'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
-    packagesToPack: 'Scriptor\Scriptor.csproj;Scriptor.AspExtensions\Scriptor.AspExtensions.csproj'
+    packagesToPack: |
+      Scriptor\Scriptor.csproj
+      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
+
+
 
 - task: DotNetCoreCLI@2
   inputs:
