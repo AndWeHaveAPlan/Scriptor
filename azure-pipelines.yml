@@ -18,28 +18,31 @@ steps:
 
 
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
   inputs:
     command: 'restore'
     projects: 'Scriptor*\Scriptor*.csproj'
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
   inputs:
     command: 'build'
     projects: 'Scriptor*\Scriptor*.csproj'
     arguments: '--no-restore'
 
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
   inputs:
     command: 'pack'
     packagesToPack: 'Scriptor*\Scriptor*.csproj'
+    packDirectory: '$(Build.ArtifactStagingDirectory)'
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
 
-
-
 - task: DotNetCoreCLI@2
+  displayName: 'dotnet push'
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
