@@ -36,9 +36,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
-    packagesToPack: |
-      Scriptor\Scriptor.csproj
-      Scriptor.AspExtensions\Scriptor.AspExtensions.csproj
+    packagesToPack: 'Scriptor*\Scriptor*.csproj'
     nobuild: true
     includesymbols: true
     versioningScheme: 'off'
