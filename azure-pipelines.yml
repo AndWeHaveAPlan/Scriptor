@@ -16,35 +16,30 @@ variables:
 
 steps:
 
-
 - task: DotNetCoreCLI@2
   displayName: 'dotnet restore'
   inputs:
     command: 'restore'
-    projects: 'Scriptor*\Scriptor*.csproj'
     feedsToUse: 'select'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
-    command: 'build'
-    projects: 'Scriptor*\Scriptor*.csproj'
-    arguments: '--no-restore'
+    command: 'custom'
+    projects: '**/*.csproj'
+    custom: 'build -c Release'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack'
   inputs:
-    command: 'pack'
-    packagesToPack: 'Scriptor*\Scriptor*.csproj'
-    packDirectory: '$(Build.ArtifactStagingDirectory)'
-    nobuild: true
-    includesymbols: true
-    versioningScheme: 'off'
+    command: 'custom'
+    projects: '**/*.csproj'
+    custom: 'pack -c Release --no-build --no-restore -o ./app'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet push'
   inputs:
     command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    packagesToPush: './app/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
