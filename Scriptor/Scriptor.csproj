@@ -5,6 +5,11 @@
     <Version>0.2.4</Version>
     <Description>Simple logging library</Description>
     <PackageReleaseNotes>use proper IHttpContextAccessor injection</PackageReleaseNotes>
+    <PackageId>AndWeHaveAPlan.Scriptor</PackageId>
+    <AssemblyName>AndWeHaveAPlan.Scriptor</AssemblyName>
+    <RootNamespace>AndWeHaveAPlan.Scriptor</RootNamespace>
+    <Authors>Eugen Snitko</Authors>
+    <Company />
   </PropertyGroup>
 
   <ItemGroup>

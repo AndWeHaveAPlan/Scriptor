@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Extensions.Logging;
 
-namespace Scriptor.Loggers
+namespace AndWeHaveAPlan.Scriptor.Loggers
 {
     public abstract class ScriptorLogger : ILogger
     {

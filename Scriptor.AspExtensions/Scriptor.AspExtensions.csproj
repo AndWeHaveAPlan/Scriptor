@@ -7,10 +7,19 @@
     <AssemblyVersion>0.2.4.0</AssemblyVersion>
     <FileVersion>0.2.3.0</FileVersion>
     <PackageReleaseNotes>use proper IHttpContextAccessor injection</PackageReleaseNotes>
+    <PackageId>AndWeHaveAPlan.Scriptor.AspExtensions</PackageId>
+    <Authors>Eugen Snitko</Authors>
+    <Company />
+    <Product>AndWeHaveAPlan.Scriptor.AspExtensions</Product>
+    <AssemblyName>AndWeHaveAPlan.Scriptor.AspExtensions</AssemblyName>
+    <RootNamespace>AndWeHaveAPlan.Scriptor.AspExtensions</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Scriptor\Scriptor.csproj" />
   </ItemGroup>
 

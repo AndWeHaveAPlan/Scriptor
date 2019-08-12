@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using AndWeHaveAPlan.Scriptor.Loggers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Scriptor.Loggers;
 
-namespace Scriptor.AspExtensions.Providers
+namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
 {
     public class ScriptorLoggerProvider : ILoggerProvider
     {

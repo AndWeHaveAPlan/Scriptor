@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Scriptor.Loggers
+namespace AndWeHaveAPlan.Scriptor.Loggers
 {
     public class JsonConsoleLogger : ScriptorLogger
     {

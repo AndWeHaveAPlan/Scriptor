@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using AndWeHaveAPlan.Scriptor.Loggers;
 using Microsoft.Extensions.Logging;
-using Scriptor.Loggers;
 
 namespace Scriptor.Playground
 {

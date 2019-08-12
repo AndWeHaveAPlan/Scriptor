@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 
-namespace Scriptor
+namespace AndWeHaveAPlan.Scriptor
 {
     internal class ConsoleLogScope
     {

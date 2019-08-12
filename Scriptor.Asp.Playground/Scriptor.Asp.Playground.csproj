@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <AssemblyName>AndWeHaveAPlan.Scriptor.Asp.Playground</AssemblyName>
+    <RootNamespace>AndWeHaveAPlan.Scriptor.Asp.Playground</RootNamespace>
+    <Authors>Eugen Snitko</Authors>
+    <Company />
   </PropertyGroup>
 
   <ItemGroup>

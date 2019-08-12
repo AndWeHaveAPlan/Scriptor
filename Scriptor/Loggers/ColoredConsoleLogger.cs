@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Scriptor.Loggers
+namespace AndWeHaveAPlan.Scriptor.Loggers
 {
     public class ColoredConsoleLogger : ScriptorLogger
     {
