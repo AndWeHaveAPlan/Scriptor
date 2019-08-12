@@ -45,3 +45,10 @@ steps:
     packagesToPush: 'Scriptor*/pkg/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: 'Scriptor*/pkg/*.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'nuget.org'
