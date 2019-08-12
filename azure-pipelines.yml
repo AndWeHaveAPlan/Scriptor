@@ -27,14 +27,16 @@ steps:
   inputs:
     command: 'custom'
     projects: '**/*.csproj'
-    custom: 'build -c Release'
+    custom: 'build'
+    arguments: '-c Release'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet pack'
   inputs:
     command: 'custom'
     projects: '**/*.csproj'
-    custom: 'pack -c Release --no-build --no-restore -o ./app'
+    custom: 'pack'
+    arguments: '-c Release --no-build --no-restore -o ./app'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet push'
