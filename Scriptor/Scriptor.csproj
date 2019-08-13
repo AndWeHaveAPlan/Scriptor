@@ -2,14 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>0.2.4</Version>
+    <Version>0.2.5</Version>
     <Description>Simple logging library</Description>
-    <PackageReleaseNotes>use proper IHttpContextAccessor injection</PackageReleaseNotes>
+    <PackageReleaseNotes></PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor</PackageId>
     <AssemblyName>AndWeHaveAPlan.Scriptor</AssemblyName>
     <RootNamespace>AndWeHaveAPlan.Scriptor</RootNamespace>
     <Authors>Eugen Snitko</Authors>
     <Company />
+    <RepositoryUrl>https://github.com/AndWeHaveAPlan/Scriptor</RepositoryUrl>
+    <RepositoryType>gitthub</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
