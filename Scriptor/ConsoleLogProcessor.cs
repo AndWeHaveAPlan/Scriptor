@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Scriptor
+namespace AndWeHaveAPlan.Scriptor
 {
     internal class ConsoleLogProcessor : IDisposable
     {
