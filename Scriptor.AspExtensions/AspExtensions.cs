@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AndWeHaveAPlan.Scriptor.AspExtensions.Providers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Scriptor.AspExtensions.Providers;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
 {
