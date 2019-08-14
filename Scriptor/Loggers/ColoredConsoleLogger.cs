@@ -21,7 +21,7 @@ namespace Scriptor.Loggers
         public ColoredConsoleLogger(string name, bool includeScopes = false) : base(name, includeScopes)
         { }
 
-        protected override QueueItem[] ComposeInternal(LogMessage message)
+        protected override List<QueueItem> ComposeInternal(LogMessage message)
         {
             var result = new List<QueueItem>();
 
@@ -78,7 +78,7 @@ namespace Scriptor.Loggers
                     String = message.Exception
                 });
 
-            return result.ToArray();
+            return result;
         }
     }
 }

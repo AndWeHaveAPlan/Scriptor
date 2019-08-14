@@ -10,13 +10,13 @@ namespace Scriptor.AspExtensions.Providers
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly bool _useJson;
-        private readonly KeyValuePair<string, string>[] _headers;
+        private readonly (string key, string value)[] _headers;
 
         public void Dispose()
         {
         }
 
-        public ScriptorLoggerProvider(IHttpContextAccessor httpContextAccessor, bool useJson = false, params KeyValuePair<string, string>[] injectHeaders)
+        public ScriptorLoggerProvider(IHttpContextAccessor httpContextAccessor, bool useJson = false, params (string key, string value)[] injectHeaders)
         {
             _httpContextAccessor = httpContextAccessor;
             _useJson = useJson;
