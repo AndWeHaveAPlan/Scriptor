@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
@@ -15,9 +16,9 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         }
 
-        protected override QueueItem[] ComposeInternal(LogMessage message)
+        protected override List<QueueItem> ComposeInternal(LogMessage message)
         {
-            var result = new QueueItem[1];
+            var result = new List<QueueItem>();
 
             var jObject = JObject.FromObject(message);
 
@@ -29,10 +30,10 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 }
             }
 
-            result[0] = new QueueItem
+            result.Add(new QueueItem
             {
                 String = jObject.ToString(Formatting.None)
-            };
+            });
 
             return result;
         }

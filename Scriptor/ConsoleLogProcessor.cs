@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace AndWeHaveAPlan.Scriptor
 {
     internal class ConsoleLogProcessor : IDisposable
     {
-        private static readonly BlockingCollection<QueueItem[]> _messageQueue = new BlockingCollection<QueueItem[]>();
+        private static readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>();
 
         private static readonly Task _outputTask;
 
@@ -25,7 +26,7 @@ namespace AndWeHaveAPlan.Scriptor
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public virtual void EnqueueMessage(QueueItem[] message)
+        public virtual void EnqueueMessage(List<QueueItem> message)
         {
             if (!_messageQueue.IsAddingCompleted)
             {
@@ -44,7 +45,7 @@ namespace AndWeHaveAPlan.Scriptor
             WriteMessage(message);
         }
 
-        private static void WriteMessage(QueueItem[] message)
+        private static void WriteMessage(List<QueueItem> message)
         {
             foreach (var queueItem in message)
             {

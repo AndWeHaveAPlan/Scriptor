@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
 {
+    /// <summary>
+    /// Base class for scriptor loggers
+    /// </summary>
     public abstract class ScriptorLogger : ILogger
     {
         private static readonly ConsoleLogProcessor QueueProcessor;
@@ -20,7 +23,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        protected Func<LogMessage, QueueItem[]> Compose;
+        protected Func<LogMessage, List<QueueItem>> Compose;
 
         static ScriptorLogger()
         {
@@ -92,7 +95,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <param name="eventId"></param>
         /// <param name="message"></param>
         /// <param name="exception"></param>
-        public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        private void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
             var logMessage = new LogMessage
             {
@@ -107,32 +110,40 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
 
-            var queueItem = Compose(logMessage);
+            var queueItems = Compose(logMessage);
 
-            QueueProcessor.EnqueueMessage(queueItem);
+            QueueProcessor.EnqueueMessage(queueItems);
         }
 
         /// <summary>
-        /// 
+        /// Default compose func
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        protected abstract QueueItem[] ComposeInternal(LogMessage message);
+        protected abstract List<QueueItem> ComposeInternal(LogMessage message);
 
         /// <summary>
-        /// 
+        /// Custom message formatting method (executed after custom data injection)
         /// </summary>
         /// <param name="composeFunc"></param>
-        public void UseComposer(Func<LogMessage, QueueItem[]> composeFunc)
+        public void UseComposer(Func<LogMessage, List<QueueItem>> composeFunc)
         {
             Compose = composeFunc;
         }
 
+        /// <summary>
+        /// Use Syslog RFC severity numbers instead of Microsoft.Extensions.Logging.LogLevel values
+        /// RFC 5424 https://www.rfc-editor.org/rfc/rfc5424.txt [Page 10]
+        /// </summary>
         public void UseRfcLogLevel()
         {
             UseRfcLevel = true;
         }
 
+        /// <summary>
+        /// Inject custom data in LogMessage.AuxData (executed before composing message)
+        /// </summary>
+        /// <param name="injectFunc"></param>
         public void InjectData(Func<Dictionary<string, string>> injectFunc)
         {
             Inject = injectFunc;
