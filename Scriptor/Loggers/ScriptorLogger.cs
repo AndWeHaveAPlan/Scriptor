@@ -107,6 +107,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 AuxData = Inject?.Invoke()
             };
 
+            logMessage = ExtractField(logMessage);
 
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
@@ -178,6 +179,30 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             }
 
             return stringBuilder.ToString();
+        }
+
+        private static LogMessage ExtractField(LogMessage logMessage)
+        {
+            var matches = FieldRegex.Matches(logMessage.Message);
+
+            if (matches.Count > 0 && logMessage.AuxData == null)
+                logMessage.AuxData = new Dictionary<string, string>();
+
+            foreach (Match match in matches)
+            {
+                var key = match.Groups[1].Value;
+                var value = match.Groups[2].Value;
+                if (logMessage.AuxData.ContainsKey(key))
+                {
+                    logMessage.AuxData[key] = value;
+                }
+                else
+                {
+                    logMessage.AuxData.Add(key, value);
+                }
+            }
+
+            return logMessage;
         }
 
         private static string GetLogLevelString(LogLevel logLevel)

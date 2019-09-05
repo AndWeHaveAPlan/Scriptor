@@ -8,7 +8,7 @@ namespace AndWeHaveAPlan.Scriptor
 {
     internal class ConsoleLogProcessor : IDisposable
     {
-        private readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>();
+        private readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>(100);
 
         private readonly Task _outputTask;
 
@@ -45,7 +45,7 @@ namespace AndWeHaveAPlan.Scriptor
             WriteMessage(message);
         }
 
-        private static void WriteMessage(List<QueueItem> message)
+        private static void WriteMessage(IEnumerable<QueueItem> message)
         {
             foreach (var queueItem in message)
             {
