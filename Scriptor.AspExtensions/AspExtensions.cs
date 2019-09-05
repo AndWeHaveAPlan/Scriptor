@@ -18,7 +18,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         /// <param name="useJson"></param>
         /// <param name="injectHeaders"></param>
         /// <returns></returns>
-        [Obsolete]
+        [Obsolete("Use UseScriptor(this IWebHostBuilder builder, Action<ScriptorOptions> optionsAction)")]
         public static IWebHostBuilder UseScriptor(this IWebHostBuilder builder, bool useJson = false, params KeyValuePair<string, string>[] injectHeaders)
         {
             builder
@@ -62,6 +62,12 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
 
                     if (options.OnlyScriptor)
                         logBuilder.ClearProviders();
+
+
+                    //                    logBuilder.AddFilter("Default", options.MinLogLevel);
+                    logBuilder.SetMinimumLevel(options.MinLogLevel);
+                    logBuilder.AddFilter("Microsoft", options.AspMinLogLevel);
+
                     logBuilder.AddProvider(new ScriptorLoggerProvider(accessor, options.Json, options.InjectedHeaders));
                 });
 

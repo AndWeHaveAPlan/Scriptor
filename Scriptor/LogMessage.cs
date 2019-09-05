@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace AndWeHaveAPlan.Scriptor
 {
-    public class LogMessage
+    public struct LogMessage
     {
         [JsonIgnore]
         public Dictionary<string, string> AuxData;

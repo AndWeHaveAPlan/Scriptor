@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
@@ -10,8 +11,10 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
     /// </summary>
     public abstract class ScriptorLogger : ILogger
     {
-        private static readonly ConsoleLogProcessor QueueProcessor;
+        private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
         private Func<string, LogLevel, bool> _filter;
+
+        private static readonly Regex FieldRegex = new Regex(@"\{\{\s*([\w-]*):\s*([\w\s]*\w)\s*\}\}");
 
         protected bool UseRfcLevel;
 
@@ -25,13 +28,9 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// </summary>
         protected Func<LogMessage, List<QueueItem>> Compose;
 
-        static ScriptorLogger()
-        {
-            QueueProcessor = new ConsoleLogProcessor();
-        }
-
         protected ScriptorLogger(string name, bool includeScopes)
         {
+            //_fieldRegex.
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Filter = (category, logLevel) => true;
             IncludeScopes = includeScopes;
@@ -69,6 +68,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <param name="formatter"></param>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
+
             if (!IsEnabled(logLevel))
             {
                 return;
@@ -107,6 +107,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 AuxData = Inject?.Invoke()
             };
 
+
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
 
@@ -123,7 +124,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         protected abstract List<QueueItem> ComposeInternal(LogMessage message);
 
         /// <summary>
-        /// Custom message formatting method (executed after custom data injection)
+        /// Custom logMessage formatting method (executed after custom data injection)
         /// </summary>
         /// <param name="composeFunc"></param>
         public void UseComposer(Func<LogMessage, List<QueueItem>> composeFunc)
@@ -141,7 +142,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         }
 
         /// <summary>
-        /// Inject custom data in LogMessage.AuxData (executed before composing message)
+        /// Inject custom data in LogMessage.AuxData (executed before composing logMessage)
         /// </summary>
         /// <param name="injectFunc"></param>
         public void InjectData(Func<Dictionary<string, string>> injectFunc)
@@ -151,7 +152,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return Filter(Name, logLevel);
+            return Filter?.Invoke(Name, logLevel) ?? true;
         }
 
         public IDisposable BeginScope<TState>(TState state)

@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AndWeHaveAPlan.Scriptor
 {
     internal class ConsoleLogProcessor : IDisposable
     {
-        private static readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>();
+        private readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>();
 
-        private static readonly Task _outputTask;
+        private readonly Task _outputTask;
 
         /// <summary>
         /// 
         /// </summary>
-        static ConsoleLogProcessor()
+        public ConsoleLogProcessor()
         {
             _outputTask = Task.Factory.StartNew(
                 ProcessLogQueue,
@@ -41,7 +42,6 @@ namespace AndWeHaveAPlan.Scriptor
                 }
             }
 
-            // Adding is completed so just log the message
             WriteMessage(message);
         }
 
@@ -58,10 +58,11 @@ namespace AndWeHaveAPlan.Scriptor
                 Console.Write(queueItem.String);
                 Console.ResetColor();
             }
+
             Console.WriteLine();
         }
 
-        private void ProcessLogQueue()
+        private void ProcessLogQueue(object state)
         {
             foreach (var message in _messageQueue.GetConsumingEnumerable())
             {
@@ -69,13 +70,6 @@ namespace AndWeHaveAPlan.Scriptor
             }
         }
 
-        private static void ProcessLogQueue(object state)
-        {
-            foreach (var message in _messageQueue.GetConsumingEnumerable())
-            {
-                WriteMessage(message);
-            }
-        }
 
         public void Dispose()
         {
