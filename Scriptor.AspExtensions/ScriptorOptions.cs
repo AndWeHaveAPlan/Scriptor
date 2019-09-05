@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
 {
@@ -9,6 +10,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         internal bool Json;
         internal bool OnlyScriptor;
         internal bool ExtendedErrorResponses;
+        internal LogLevel MinLogLevel = LogLevel.Information;
+        internal LogLevel AspMinLogLevel = LogLevel.Warning;
 
         internal (string propertyName, string headerName)[] InjectedHeaders;
 
@@ -19,6 +22,13 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         public ScriptorOptions UseJson()
         {
             Json = true;
+            return this;
+        }
+
+        public ScriptorOptions UseMinimumLogLevel(LogLevel minLevel, LogLevel aspMinLevel = LogLevel.Warning)
+        {
+            MinLogLevel = minLevel;
+            AspMinLogLevel = aspMinLevel;
             return this;
         }
 
@@ -49,3 +59,4 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         }
     }
 }
+

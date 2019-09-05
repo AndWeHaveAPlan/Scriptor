@@ -20,7 +20,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
             _httpContextAccessor = httpContextAccessor;
             _useJson = useJson;
-            _headers = injectHeaders;
+            _headers = injectHeaders ?? new (string key, string value)[0];
         }
 
         public ILogger CreateLogger(string categoryName)

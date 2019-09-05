@@ -32,16 +32,18 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             });
 
             if (IncludeScopes)
+            {
                 result.Add(new QueueItem
                 {
                     ForegroundColor = ConsoleColor.Yellow,
                     String = message.Scope
                 });
 
-            result.Add(new QueueItem
-            {
-                String = "\n"
-            });
+                result.Add(new QueueItem
+                {
+                    String = "\n"
+                });
+            }
 
             if (message.AuxData != null)
             {
@@ -66,17 +68,20 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 String = message.Message
             });
 
-            result.Add(new QueueItem
-            {
-                String = "\n"
-            });
 
             if (message.Exception != null)
+            {
+                result.Add(new QueueItem
+                {
+                    String = "\n"
+                });
+
                 result.Add(new QueueItem
                 {
                     ForegroundColor = ConsoleColor.Red,
                     String = message.Exception
                 });
+            }
 
             return result;
         }
