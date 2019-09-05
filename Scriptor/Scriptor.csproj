@@ -2,9 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>0.2.7</Version>
+    <Version>0.2.8</Version>
     <Description>Simple logging library</Description>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>Extract field feature
+Reduce memory leak</PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor</PackageId>
     <AssemblyName>AndWeHaveAPlan.Scriptor</AssemblyName>
     <RootNamespace>AndWeHaveAPlan.Scriptor</RootNamespace>
