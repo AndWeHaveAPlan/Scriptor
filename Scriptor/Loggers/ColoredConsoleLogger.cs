@@ -31,7 +31,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 String = $"[ {message.LevelString} | {message.Level} | {message.Timestamp:O} ] {Name}:\n"
             });
 
-            if (IncludeScopes)
+            if (IncludeScopes && !string.IsNullOrEmpty(message.Scope))
             {
                 result.Add(new QueueItem
                 {
@@ -82,6 +82,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                     String = message.Exception
                 });
             }
+
+            result.Add(new QueueItem
+            {
+                String = "\n"
+            });
 
             return result;
         }

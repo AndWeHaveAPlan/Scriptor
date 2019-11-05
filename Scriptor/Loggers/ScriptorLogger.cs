@@ -14,7 +14,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
         private Func<string, LogLevel, bool> _filter;
 
-        private static readonly Regex FieldRegex = new Regex(@"\{\{\s*([\w-]*):\s*([\w\s]*\w)\s*\}\}");
+        private static readonly List<Regex> FieldRegex = new List<Regex>
+        {
+            new Regex(@"\{\{\s*([\w-]*):\s*([\w\s]*\w)\s*\}\}"),
+            new Regex(@"\[\s*([\w-]*):\s*([\w\s]*\w)\s*\]")
+        };
 
         protected bool UseRfcLevel;
 
@@ -30,7 +34,6 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         protected ScriptorLogger(string name, bool includeScopes)
         {
-            //_fieldRegex.
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Filter = (category, logLevel) => true;
             IncludeScopes = includeScopes;
@@ -183,7 +186,12 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         private static LogMessage ExtractField(LogMessage logMessage)
         {
-            var matches = FieldRegex.Matches(logMessage.Message);
+            List<Match> matches = new List<Match>();
+
+            foreach (var regex in FieldRegex)
+            {
+                matches.AddRange(regex.Matches(logMessage.Message));
+            }
 
             if (matches.Count > 0 && logMessage.AuxData == null)
                 logMessage.AuxData = new Dictionary<string, string>();
