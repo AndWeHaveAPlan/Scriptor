@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <Version>0.2.9</Version>
+    <Version>0.2.10</Version>
     <Description>Simple logging library</Description>
-    <PackageReleaseNotes>new extract field separator</PackageReleaseNotes>
+    <PackageReleaseNotes>logger settings (timestamp for now)</PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor</PackageId>
     <AssemblyName>AndWeHaveAPlan.Scriptor</AssemblyName>
     <RootNamespace>AndWeHaveAPlan.Scriptor</RootNamespace>
@@ -12,6 +12,8 @@
     <Company />
     <RepositoryUrl>https://github.com/AndWeHaveAPlan/Scriptor</RepositoryUrl>
     <RepositoryType>gitthub</RepositoryType>
+    <AssemblyVersion>0.2.10.0</AssemblyVersion>
+    <FileVersion>0.2.10.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
