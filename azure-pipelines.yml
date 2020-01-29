@@ -42,6 +42,6 @@ steps:
   displayName: 'nuget push'
   inputs:
     command: 'push'
-    packagesToPush: 'Scriptor*/pkg/*.nupkg'
+    packagesToPush: 'pkg/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
