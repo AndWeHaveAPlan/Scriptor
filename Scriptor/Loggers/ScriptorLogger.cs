@@ -14,6 +14,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
         private Func<string, LogLevel, bool> _filter;
 
+        public LoggerSettings LoggerSettings = LoggerSettings.Default;
+
         private static readonly List<Regex> FieldRegex = new List<Regex>
         {
             new Regex(@"\{\{\s*([\w-]*):\s*([\w\s]*\w)\s*\}\}"),
@@ -102,7 +104,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         {
             var logMessage = new LogMessage
             {
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow.ToString(LoggerSettings.TimestampFormat),
                 LevelString = GetLogLevelString(logLevel),
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,

@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
 {
     public class ScriptorOptions
     {
         internal bool Json;
+        internal JsonSerializerSettings JsonSerializerSettings;
+
+        internal LoggerSettings LoggerSettings;
+
         internal bool OnlyScriptor;
         internal bool ExtendedErrorResponses;
         internal LogLevel MinLogLevel = LogLevel.Information;
@@ -19,9 +21,16 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         /// Use plain json single line log messages
         /// </summary>
         /// <returns></returns>
-        public ScriptorOptions UseJson()
+        public ScriptorOptions UseJson(JsonLoggerOptions options = null)
         {
             Json = true;
+            JsonSerializerSettings = options?.JsonSerializerSettings;
+            return this;
+        }
+
+        public ScriptorOptions UseSettings(LoggerSettings loggerSettings = null)
+        {
+            LoggerSettings = loggerSettings ?? LoggerSettings.Default;
             return this;
         }
 

@@ -6,6 +6,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 {
     public class JsonConsoleLogger : ScriptorLogger
     {
+        public static JsonSerializer JsonSerializer = JsonSerializer.CreateDefault();
+
         /// <summary>
         /// 
         /// </summary>
@@ -13,14 +15,13 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <param name="includeScopes"></param>
         public JsonConsoleLogger(string name, bool includeScopes = false) : base(name, includeScopes)
         {
-
         }
 
         protected override List<QueueItem> ComposeInternal(LogMessage message)
         {
             var result = new List<QueueItem>();
 
-            var jObject = JObject.FromObject(message);
+            var jObject = JObject.FromObject(message, JsonSerializer);
 
             if (message.AuxData != null)
             {
