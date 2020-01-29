@@ -47,7 +47,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
                 logger = new ColoredConsoleLogger(categoryName, true);
             }
 
-            logger.LoggerSettings = _options.LoggerSettings;
+            logger.LoggerSettings = _options?.LoggerSettings ?? LoggerSettings.Default;
 
             logger.InjectData(InjectFunc);
 
