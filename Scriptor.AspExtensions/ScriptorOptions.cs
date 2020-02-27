@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
@@ -14,6 +15,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         internal bool ExtendedErrorResponses;
         internal LogLevel MinLogLevel = LogLevel.Information;
         internal LogLevel AspMinLogLevel = LogLevel.Warning;
+        internal bool SetMinimumLogLevel = false;
+        internal bool RfcLogLevelNumbers = false;
 
         internal (string propertyName, string headerName)[] InjectedHeaders;
 
@@ -34,8 +37,22 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
             return this;
         }
 
+        /// <summary>
+        /// Obsolete, use
+        /// ConfigureLogging(builder => {
+        ///     builder.SetMinimumLevel(...)
+        ///     and
+        ///     builder.AddFilter(...)
+        /// }
+        /// instead
+        /// </summary>
+        /// <param name="minLevel"></param>
+        /// <param name="aspMinLevel"></param>
+        /// <returns></returns>
+        [Obsolete]
         public ScriptorOptions UseMinimumLogLevel(LogLevel minLevel, LogLevel aspMinLevel = LogLevel.Warning)
         {
+            SetMinimumLogLevel = true;
             MinLogLevel = minLevel;
             AspMinLogLevel = aspMinLevel;
             return this;
@@ -64,6 +81,16 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         private ScriptorOptions UseExtendedErrorResponses()
         {
             ExtendedErrorResponses = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Unused by now
+        /// </summary>
+        /// <returns></returns>
+        private ScriptorOptions UseRfcLogLevelNumbers()
+        {
+            RfcLogLevelNumbers = true;
             return this;
         }
     }

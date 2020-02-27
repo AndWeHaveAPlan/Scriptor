@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using AndWeHaveAPlan.Scriptor.Loggers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -22,16 +24,16 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
             _httpContextAccessor = httpContextAccessor;
             _options = options;
-            _useJson = options.Json;
+            _useJson = options?.Json == true;
 
             if (_useJson)
             {
                 JsonConsoleLogger.JsonSerializer = JsonSerializer.Create(
-                    options.JsonSerializerSettings ??
+                    options?.JsonSerializerSettings ??
                     new JsonSerializerSettings());
             }
 
-            _headers = options.InjectedHeaders ?? new (string key, string value)[0];
+            _headers = options?.InjectedHeaders ?? new (string key, string value)[0];
         }
 
         public ILogger CreateLogger(string categoryName)
@@ -51,18 +53,28 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
 
             logger.InjectData(InjectFunc);
 
-            logger.UseRfcLogLevel();
+            if (_options?.RfcLogLevelNumbers == true)
+                logger.UseRfcLogLevel();
 
             return logger;
         }
 
-        private Dictionary<string, string> InjectFunc()
+        private Dictionary<string, string> InjectFunc(LogLevel logLevel)
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
             foreach (var (key, value) in _headers)
             {
                 result.Add(key, _httpContextAccessor.HttpContext?.Request.Headers[value].FirstOrDefault());
+            }
+
+            if (logLevel <= LogLevel.Debug)
+            {
+                var process = Process.GetCurrentProcess();
+                var thread = Thread.CurrentThread;
+
+                result.Add("net_process_id", process.Id.ToString());
+                result.Add("net_thread_id", thread.ManagedThreadId.ToString());
             }
 
             return result;

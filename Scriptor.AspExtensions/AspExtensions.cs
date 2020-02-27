@@ -3,6 +3,7 @@ using AndWeHaveAPlan.Scriptor.AspExtensions.Providers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
@@ -24,7 +25,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
             builder
                 .ConfigureServices(services =>
                 {
-                    services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                    services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
                 })
                 .ConfigureLogging(logBuilder =>
                 {
@@ -33,10 +34,12 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
                     if (options.OnlyScriptor)
                         logBuilder.ClearProviders();
 
-
-                    //                    logBuilder.AddFilter("Default", options.MinLogLevel);
-                    logBuilder.SetMinimumLevel(options.MinLogLevel);
-                    logBuilder.AddFilter("Microsoft", options.AspMinLogLevel);
+                    if (options.SetMinimumLogLevel)
+                    {
+                        // obsolete options.UseMinimumLogLevel
+                        logBuilder.SetMinimumLevel(options.MinLogLevel);
+                        logBuilder.AddFilter("Microsoft", options.AspMinLogLevel);
+                    }
 
                     logBuilder.AddProvider(new ScriptorLoggerProvider(accessor, options));
                 });

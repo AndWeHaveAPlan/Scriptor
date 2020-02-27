@@ -27,7 +27,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        protected Func<Dictionary<string, string>> Inject;
+        protected Func<LogLevel, Dictionary<string, string>> Inject;
 
         /// <summary>
         /// 
@@ -109,7 +109,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,
                 Exception = exception?.ToString(),
-                AuxData = Inject?.Invoke()
+                AuxData = Inject?.Invoke(logLevel)
             };
 
             logMessage = ExtractField(logMessage);
@@ -151,7 +151,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// Inject custom data in LogMessage.AuxData (executed before composing logMessage)
         /// </summary>
         /// <param name="injectFunc"></param>
-        public void InjectData(Func<Dictionary<string, string>> injectFunc)
+        public void InjectData(Func<LogLevel, Dictionary<string, string>> injectFunc)
         {
             Inject = injectFunc;
         }
