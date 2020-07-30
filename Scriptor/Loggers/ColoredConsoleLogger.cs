@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
 {
@@ -9,16 +10,9 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        static ColoredConsoleLogger()
-        {
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
         /// <param name="name"></param>
-        /// <param name="includeScopes"></param>
-        public ColoredConsoleLogger(string name, bool includeScopes = false) : base(name, includeScopes)
+        /// <param name="scopeProvider"></param>
+        public ColoredConsoleLogger(string name, IExternalScopeProvider scopeProvider) : base(name, scopeProvider)
         { }
 
         protected override List<QueueItem> ComposeInternal(LogMessage message)

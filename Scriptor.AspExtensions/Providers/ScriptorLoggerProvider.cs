@@ -16,6 +16,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         private readonly bool _useJson;
         private readonly (string key, string value)[] _headers;
 
+        private IExternalScopeProvider _scopeProvider= new LoggerExternalScopeProvider();
+
         public void Dispose()
         {
         }
@@ -40,13 +42,15 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
             ScriptorLogger logger;
 
+            var scopeProvider = _scopeProvider ;//?? new LoggerExternalScopeProvider();
+
             if (_useJson)
             {
-                logger = new JsonConsoleLogger(categoryName, true);
+                logger = new JsonConsoleLogger(categoryName, scopeProvider);
             }
             else
             {
-                logger = new ColoredConsoleLogger(categoryName, true);
+                logger = new ColoredConsoleLogger(categoryName, scopeProvider);
             }
 
             logger.LoggerSettings = _options?.LoggerSettings ?? LoggerSettings.Default;
@@ -68,6 +72,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
                 result.Add(key, _httpContextAccessor.HttpContext?.Request.Headers[value].FirstOrDefault());
             }
 
+
             if (logLevel <= LogLevel.Debug)
             {
                 var process = Process.GetCurrentProcess();
@@ -78,6 +83,12 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
             }
 
             return result;
+        }
+
+        public ScriptorLoggerProvider UseScopeProvider(IExternalScopeProvider scopeProvider)
+        {
+            _scopeProvider = scopeProvider;
+            return this;
         }
     }
 }

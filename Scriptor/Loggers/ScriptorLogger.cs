@@ -9,17 +9,19 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
     /// <summary>
     /// Base class for scriptor loggers
     /// </summary>
-    public abstract class ScriptorLogger : ILogger
+    public abstract class ScriptorLogger : ILogger, ISupportExternalScope
     {
         private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
         private Func<string, LogLevel, bool> _filter;
 
         public LoggerSettings LoggerSettings = LoggerSettings.Default;
 
+        private IExternalScopeProvider _scopeProvider;
+
         private static readonly List<Regex> FieldRegex = new List<Regex>
         {
-            new Regex(@"\{\{\s*([\w-]*):\s*([\w\s]*\w)\s*\}\}"),
-            new Regex(@"\[\s*([\w-]*):\s*([\w\s]*\w)\s*\]")
+            new Regex(@"\{\{\s*([\w-]*):\s*(.*[^\s])\s*\}\}", RegexOptions.Compiled),
+            new Regex(@"\[\s*([\w-]*):\s*(.*[^\s])\s*\]", RegexOptions.Compiled)
         };
 
         protected bool UseRfcLevel;
@@ -34,11 +36,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// </summary>
         protected Func<LogMessage, List<QueueItem>> Compose;
 
-        protected ScriptorLogger(string name, bool includeScopes)
+        protected ScriptorLogger(string name, IExternalScopeProvider scopeProvider)
         {
+            _scopeProvider = scopeProvider;
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Filter = (category, logLevel) => true;
-            IncludeScopes = includeScopes;
 
             Compose = ComposeInternal;
         }
@@ -55,7 +57,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        public bool IncludeScopes { get; set; }
+        public bool IncludeScopes => _scopeProvider != null;
 
         /// <summary>
         /// 
@@ -161,27 +163,36 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             return Filter?.Invoke(Name, logLevel) ?? true;
         }
 
+        /// <summary>
+        /// Begin logging scope
+        /// </summary>
+        /// <typeparam name="TState"></typeparam>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public IDisposable BeginScope<TState>(TState state)
         {
+            /*
             if (state == null)
             {
                 throw new ArgumentNullException(nameof(state));
             }
-            return ConsoleLogScope.Push(Name, state);
+            return ConsoleLogScope.Push(Name, state);*/
+
+            var scope = _scopeProvider?.Push(state);
+            return scope;
         }
 
         private string GetScopeInformation()
         {
             var stringBuilder = new StringBuilder();
 
-            var current = ConsoleLogScope.Current;
-
-            while (current != null)
+            _scopeProvider?.ForEachScope((scopeObj, state) =>
             {
-                stringBuilder.Append("=>");
-                stringBuilder.Append(current);
-                current = current.Parent;
-            }
+                if (state.Length != 0)
+                    state.Append("\r\n");
+                state.Append(scopeObj);
+            }, stringBuilder);
+
 
             return stringBuilder.ToString();
         }
@@ -255,6 +266,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 default:
                     throw new ArgumentOutOfRangeException(nameof(logLevel));
             }
+        }
+
+        public void SetScopeProvider(IExternalScopeProvider scopeProvider)
+        {
+            _scopeProvider = scopeProvider;
         }
     }
 }

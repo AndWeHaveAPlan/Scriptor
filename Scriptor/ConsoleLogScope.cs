@@ -3,6 +3,8 @@ using System.Threading;
 
 namespace AndWeHaveAPlan.Scriptor
 {
+    /*
+    [Obsolete]
     internal class ConsoleLogScope
     {
         private readonly string _name;
@@ -43,5 +45,7 @@ namespace AndWeHaveAPlan.Scriptor
                 Current = Current.Parent;
             }
         }
-    }
+    }*/
+
+
 }

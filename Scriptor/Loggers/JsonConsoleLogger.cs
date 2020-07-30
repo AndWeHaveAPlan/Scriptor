@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -12,8 +13,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// 
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="includeScopes"></param>
-        public JsonConsoleLogger(string name, bool includeScopes = false) : base(name, includeScopes)
+        /// <param name="scopeProvider"></param>
+        public JsonConsoleLogger(string name, IExternalScopeProvider scopeProvider) : base(name,  scopeProvider)
         {
         }
 
