@@ -29,7 +29,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             {
                 result.Add(new QueueItem
                 {
-                    ForegroundColor = ConsoleColor.Yellow,
+                    ForegroundColor = ConsoleColor.Cyan,
                     String = message.Scope
                 });
 

@@ -25,5 +25,8 @@ namespace AndWeHaveAPlan.Scriptor
 
         [JsonProperty("timestamp")]
         public string Timestamp;
+
+
+
     }
 }

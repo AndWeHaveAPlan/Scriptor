@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using AndWeHaveAPlan.Scriptor.Scopes;
 using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
@@ -20,8 +21,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         private static readonly List<Regex> FieldRegex = new List<Regex>
         {
-            new Regex(@"\{\{\s*([\w-]*):\s*(.*[^\s])\s*\}\}", RegexOptions.Compiled),
-            new Regex(@"\[\s*([\w-]*):\s*(.*[^\s])\s*\]", RegexOptions.Compiled)
+            new Regex(@"\{\{\s*([a-zA-Z_][\w-_]*)\s*:\s*(.*[^\s])\s*\}\}", RegexOptions.Compiled),
+            new Regex(@"\[\s*([a-zA-Z_][\w-_]*)\s*:\s*(.*[^\s])\s*\]", RegexOptions.Compiled)
         };
 
         protected bool UseRfcLevel;
@@ -57,7 +58,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        public bool IncludeScopes => _scopeProvider != null;
+        public bool IncludeScopes =>true;
 
         /// <summary>
         /// 
@@ -111,10 +112,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,
                 Exception = exception?.ToString(),
-                AuxData = Inject?.Invoke(logLevel)
+                AuxData = Inject?.Invoke(logLevel) ?? new Dictionary<string, string>()
             };
 
-            logMessage = ExtractField(logMessage);
+            logMessage = ExtractFieldFromMessage(logMessage);
+            logMessage = ExtractFieldFromScope(logMessage, _scopeProvider);
 
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
@@ -171,13 +173,6 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <returns></returns>
         public IDisposable BeginScope<TState>(TState state)
         {
-            /*
-            if (state == null)
-            {
-                throw new ArgumentNullException(nameof(state));
-            }
-            return ConsoleLogScope.Push(Name, state);*/
-
             var scope = _scopeProvider?.Push(state);
             return scope;
         }
@@ -197,7 +192,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             return stringBuilder.ToString();
         }
 
-        private static LogMessage ExtractField(LogMessage logMessage)
+        private static LogMessage ExtractFieldFromMessage(LogMessage logMessage)
         {
             List<Match> matches = new List<Match>();
 
@@ -224,6 +219,36 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             }
 
             return logMessage;
+        }
+
+        private static LogMessage ExtractFieldFromScope(LogMessage logMessage, IExternalScopeProvider scopeProvider)
+        {
+            scopeProvider.ForEachScope((scopeObj, message) =>
+            {
+                if (scopeObj is ParameterizedLogScopeItem scopeItem)
+                {
+                    AddAuxData(logMessage, scopeItem.Key, scopeItem.Value);
+                }
+
+                if (scopeObj is ParameterizedLogScope scope)
+                {
+                    foreach (var (key, value) in scope)
+                    {
+                        AddAuxData(logMessage, key, value);
+                    }
+                }
+
+            }, logMessage);
+
+            return logMessage;
+        }
+
+        private static void AddAuxData(LogMessage logMessage, string key, object value)
+        {
+            if (logMessage.AuxData.ContainsKey(key))
+                logMessage.AuxData[key] = value.ToString();
+            else
+                logMessage.AuxData.Add(key, value.ToString());
         }
 
         private static string GetLogLevelString(LogLevel logLevel)
