@@ -58,7 +58,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        public bool IncludeScopes =>true;
+        public bool IncludeScopes => true;
 
         /// <summary>
         /// 
@@ -91,7 +91,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                WriteMessage(logLevel, Name, eventId.Id, message, exception);
+                WriteMessage(logLevel, eventId.Id, message, exception);
             }
         }
 
@@ -99,11 +99,10 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// 
         /// </summary>
         /// <param name="logLevel"></param>
-        /// <param name="logName"></param>
         /// <param name="eventId"></param>
         /// <param name="message"></param>
         /// <param name="exception"></param>
-        private void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        private void WriteMessage(LogLevel logLevel, int eventId, string message, Exception exception)
         {
             var logMessage = new LogMessage
             {
@@ -112,11 +111,16 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,
                 Exception = exception?.ToString(),
-                AuxData = Inject?.Invoke(logLevel) ?? new Dictionary<string, string>()
+                AuxData = Inject?.Invoke(logLevel) ?? new Dictionary<string, string>(),
+                EventId = eventId.ToString(),
+                LogName = Name
             };
 
-            logMessage = ExtractFieldFromMessage(logMessage);
-            logMessage = ExtractFieldFromScope(logMessage, _scopeProvider);
+            var scopeFields = ExtractFieldFromScope(_scopeProvider);
+            logMessage = AddAuxData(logMessage, scopeFields);
+
+            var messageFields = ExtractFieldFromMessage(logMessage);
+            logMessage = AddAuxData(logMessage, messageFields);
 
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
@@ -192,63 +196,71 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             return stringBuilder.ToString();
         }
 
-        private static LogMessage ExtractFieldFromMessage(LogMessage logMessage)
+        private static Dictionary<string, object> ExtractFieldFromMessage(LogMessage logMessage)
         {
             List<Match> matches = new List<Match>();
+
+            var resultDictionary = new Dictionary<string, object>();
 
             foreach (var regex in FieldRegex)
             {
                 matches.AddRange(regex.Matches(logMessage.Message));
             }
 
-            if (matches.Count > 0 && logMessage.AuxData == null)
-                logMessage.AuxData = new Dictionary<string, string>();
+            //if (matches.Count > 0 && logMessage.AuxData == null)
+            //logMessage.AuxData = new Dictionary<string, string>();
 
             foreach (Match match in matches)
             {
                 var key = match.Groups[1].Value;
                 var value = match.Groups[2].Value;
-                if (logMessage.AuxData.ContainsKey(key))
-                {
-                    logMessage.AuxData[key] = value;
-                }
-                else
-                {
-                    logMessage.AuxData.Add(key, value);
-                }
+                //logMessage = AddAuxData(logMessage, key, value);
+                resultDictionary[key] = value;
             }
 
-            return logMessage;
+            return resultDictionary;
         }
 
-        private static LogMessage ExtractFieldFromScope(LogMessage logMessage, IExternalScopeProvider scopeProvider)
+        public static Dictionary<string, object> ExtractFieldFromScope(IExternalScopeProvider scopeProvider)
         {
-            scopeProvider.ForEachScope((scopeObj, message) =>
+            var result = new Dictionary<string, object>();
+
+            scopeProvider.ForEachScope((scopeObj, resultDictionary) =>
             {
-                if (scopeObj is ParameterizedLogScopeItem scopeItem)
+                switch (scopeObj)
                 {
-                    AddAuxData(logMessage, scopeItem.Key, scopeItem.Value);
+                    case ParameterizedLogScopeItem scopeItem:
+                        resultDictionary[scopeItem.Key] = scopeItem.Value;
+                        break;
+                    case ParameterizedLogScope scope:
+                        foreach (var (key, value) in scope)
+                            resultDictionary[key] = value;
+                        break;
+
                 }
+            }, result);
 
-                if (scopeObj is ParameterizedLogScope scope)
-                {
-                    foreach (var (key, value) in scope)
-                    {
-                        AddAuxData(logMessage, key, value);
-                    }
-                }
-
-            }, logMessage);
-
-            return logMessage;
+            return result;
         }
 
-        private static void AddAuxData(LogMessage logMessage, string key, object value)
+        private static LogMessage AddAuxData(LogMessage logMessage, string key, object value)
         {
             if (logMessage.AuxData.ContainsKey(key))
                 logMessage.AuxData[key] = value.ToString();
             else
                 logMessage.AuxData.Add(key, value.ToString());
+
+            return logMessage;
+        }
+
+        private static LogMessage AddAuxData(LogMessage logMessage, Dictionary<string, object> fields)
+        {
+            foreach (var (key, value) in fields)
+            {
+                logMessage = AddAuxData(logMessage, key, value);
+            }
+
+            return logMessage;
         }
 
         private static string GetLogLevelString(LogLevel logLevel)

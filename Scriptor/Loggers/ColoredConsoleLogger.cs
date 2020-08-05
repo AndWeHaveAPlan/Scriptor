@@ -17,13 +17,15 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         protected override List<QueueItem> ComposeInternal(LogMessage message)
         {
-            var result = new List<QueueItem>();
-
-            result.Add(new QueueItem
+            var result = new List<QueueItem>
             {
-                ForegroundColor = ConsoleColor.Green,
-                String = $"[ {message.LevelString} | {message.Level} | {message.Timestamp:O} ] {Name}:\n"
-            });
+                new QueueItem
+                {
+                    ForegroundColor = ConsoleColor.Green,
+                    String = $"[ {message.LevelString} | {message.Level} | {message.Timestamp} ] {Name}:\n"
+                }
+            };
+
 
             if (IncludeScopes && !string.IsNullOrEmpty(message.Scope))
             {
