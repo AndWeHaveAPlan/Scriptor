@@ -15,8 +15,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         internal bool ExtendedErrorResponses;
         internal LogLevel MinLogLevel = LogLevel.Information;
         internal LogLevel AspMinLogLevel = LogLevel.Warning;
-        internal bool SetMinimumLogLevel = false;
-        internal bool RfcLogLevelNumbers = false;
+        internal bool SetMinimumLogLevel;
+        internal bool RfcLogLevelNumbers;
 
         internal (string propertyName, string headerName)[] InjectedHeaders;
 
@@ -68,6 +68,14 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
             return this;
         }
 
+        /// <summary>
+        /// Obsolete, use
+        /// IApplicationBuilder.UseHeadersScope 
+        /// instead (like in Startup.Configure
+        /// </summary>
+        /// <param name="headers"></param>
+        /// <returns></returns>
+        [Obsolete("Use IApplicationBuilder.UseHeadersScope (like in Startup.Configure)", false)]
         public ScriptorOptions InjectHttpHeaders(params (string propertyName, string headerName)[] headers)
         {
             InjectedHeaders = headers;

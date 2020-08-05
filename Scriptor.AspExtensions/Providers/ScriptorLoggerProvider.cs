@@ -16,7 +16,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         private readonly bool _useJson;
         private readonly (string key, string value)[] _headers;
 
-        private IExternalScopeProvider _scopeProvider= new LoggerExternalScopeProvider();
+        public static IExternalScopeProvider DefaultScopeProvider = new LoggerExternalScopeProvider();
 
         public void Dispose()
         {
@@ -42,7 +42,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
             ScriptorLogger logger;
 
-            var scopeProvider = _scopeProvider ;//?? new LoggerExternalScopeProvider();
+            var scopeProvider = DefaultScopeProvider;//?? new LoggerExternalScopeProvider();
 
             if (_useJson)
             {
@@ -55,7 +55,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
 
             logger.LoggerSettings = _options?.LoggerSettings ?? LoggerSettings.Default;
 
-            logger.InjectData(InjectFunc);
+            //logger.InjectData(InjectFunc);
 
             if (_options?.RfcLogLevelNumbers == true)
                 logger.UseRfcLogLevel();
@@ -67,6 +67,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
 
+            /*
             foreach (var (key, value) in _headers)
             {
                 result.Add(key, _httpContextAccessor.HttpContext?.Request.Headers[value].FirstOrDefault());
@@ -81,13 +82,13 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
                 result.Add("net_process_id", process.Id.ToString());
                 result.Add("net_thread_id", thread.ManagedThreadId.ToString());
             }
-
+            */
             return result;
         }
 
         public ScriptorLoggerProvider UseScopeProvider(IExternalScopeProvider scopeProvider)
         {
-            _scopeProvider = scopeProvider;
+            DefaultScopeProvider = scopeProvider;
             return this;
         }
     }
