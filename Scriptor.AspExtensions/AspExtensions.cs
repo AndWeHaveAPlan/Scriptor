@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AndWeHaveAPlan.Scriptor.AspExtensions.Providers;
 using AndWeHaveAPlan.Scriptor.Loggers;
 using Microsoft.AspNetCore.Builder;
@@ -75,75 +76,89 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
             }
 
             // Consume Scriptor-ForwardedScope if present
+            builder.Use(ScopeForwardedHeaders);
+
+            // Consume selected headers
             builder.Use(async (context, next) =>
             {
-                string scopeHeader = context?.Request?.Headers["Scriptor-ForwardedScope"].ToString();
-                List<(string, object)> forwardedParams = new List<(string, object)>();
-                var logger = context?.RequestServices.GetRequiredService<ILogger<ScriptorLogger>>();
-
-                if (!string.IsNullOrWhiteSpace(scopeHeader))
-                {
-                    /*foreach (var stringValue in scopeHeader.Value)
-                    {
-                        var splitIndex = stringValue.IndexOf(':');
-                        var key = stringValue.Substring(0, splitIndex);
-                        var value = stringValue.Substring(splitIndex);
-
-                        forwardedParams.Add((key, value));
-                    }*/
-
-                    var parsed = JsonConvert.DeserializeObject<Dictionary<string, string>>(scopeHeader);
-                    forwardedParams.AddRange(parsed.Select(pair =>
-                    {
-                        var (key, value) = pair;
-                        return (key, value as object);
-                    }));
-                }
-
-                if (forwardedParams.Any())
-                {
-                    using (logger.BeginParamScope(forwardedParams.ToArray()))
-                    {
-                        await next();
-                    }
-                }
-                else
-                {
-                    await next();
-                }
-            });
-
-            // Consume Scriptor-ForwardedScope if present
-            builder.Use(async (context, next) =>
-            {
-                var requestHeaders = context?.Request?.Headers;
-                List<(string, object)> scopeParams = new List<(string, object)>();
-                var logger = context?.RequestServices.GetRequiredService<ILogger<ScriptorLogger>>();
-
-                if (requestHeaders != null)
-                {
-                    foreach ((string headerName, string scopePropertyName) in headers)
-                    {
-                        var requestHeader = requestHeaders[headerName];
-                        if (requestHeader.Any())
-                            scopeParams.Add((scopePropertyName, string.Join(", ", requestHeaders[headerName])));
-                    }
-                }
-
-                if (scopeParams.Any())
-                {
-                    using (logger.BeginParamScope(scopeParams.ToArray()))
-                    {
-                        await next();
-                    }
-                }
-                else
-                {
-                    await next();
-                }
+                await ScopeHeaders(context, next, headers);
             });
 
             return builder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <returns></returns>
+        private static async Task ScopeForwardedHeaders(HttpContext context, Func<Task> next)
+        {
+            string scopeHeader = context?.Request?.Headers["Scriptor-ForwardedScope"].ToString();
+            List<(string, object)> forwardedParams = new List<(string, object)>();
+
+
+            if (!string.IsNullOrWhiteSpace(scopeHeader))
+            {
+                var parsed = JsonConvert.DeserializeObject<Dictionary<string, string>>(scopeHeader);
+                forwardedParams.AddRange(parsed.Select(pair =>
+                {
+                    var (key, value) = pair;
+                    return (key, value as object);
+                }));
+            }
+
+            await CreateScope(context, next, forwardedParams);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <param name="headers"></param>
+        /// <returns></returns>
+        private static async Task ScopeHeaders(HttpContext context, Func<Task> next, (string headerName, string scopePropertyName)[] headers)
+        {
+            var requestHeaders = context?.Request?.Headers;
+            List<(string, object)> scopeParams = new List<(string, object)>();
+
+
+            if (requestHeaders != null)
+            {
+                foreach ((string headerName, string scopePropertyName) in headers)
+                {
+                    var requestHeader = requestHeaders[headerName];
+                    if (requestHeader.Any())
+                        scopeParams.Add((scopePropertyName, string.Join(", ", requestHeaders[headerName])));
+                }
+            }
+
+            await CreateScope(context, next, scopeParams);
+        }
+
+        /// <summary>
+        /// Continue pipeline with scope if scopeParams present
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="next"></param>
+        /// <param name="scopeParams"></param>
+        /// <returns></returns>
+        private static async Task CreateScope(HttpContext context, Func<Task> next, List<(string, object)> scopeParams)
+        {
+            if (scopeParams.Any())
+            {
+                var logger = context?.RequestServices.GetRequiredService<ILogger<ScriptorLogger>>();
+                using (logger.BeginParamScope(scopeParams.ToArray()))
+                {
+                    await next();
+                }
+            }
+            else
+            {
+                await next();
+            }
         }
     }
 }
