@@ -65,7 +65,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         /// <param name="builder"></param>
         /// <param name="headers">TupleValues (string headerName, string scopePropertyName)</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseHeadersScope(
+        public static IApplicationBuilder UseHeadersAsScope(
             this IApplicationBuilder builder,
             params (string headerName, string scopePropertyName)[] headers)
         {
