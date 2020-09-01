@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace AndWeHaveAPlan.Scriptor
+namespace AndWeHaveAPlan.Scriptor.Processing
 {
-    internal class ConsoleLogProcessor : IDisposable
+    public sealed class ConsoleLogProcessor : IDisposable, ILogProcessor
     {
-        private readonly BlockingCollection<List<QueueItem>> _messageQueue = new BlockingCollection<List<QueueItem>>(100);
+        private readonly BlockingCollection<IEnumerable<QueueItem>> _messageQueue = new BlockingCollection<IEnumerable<QueueItem>>(100);
 
         private readonly Task _outputTask;
 
@@ -22,17 +23,24 @@ namespace AndWeHaveAPlan.Scriptor
                 TaskCreationOptions.LongRunning);
         }
 
+        public void EnqueueMessage(string message)
+        {
+            EnqueueMessage(new[] { new QueueItem { String = message } });
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public virtual void EnqueueMessage(List<QueueItem> message)
+        public void EnqueueMessage(IEnumerable<QueueItem> message)
         {
+            var queueItems = message as QueueItem[] ?? message.ToArray();
+
             if (!_messageQueue.IsAddingCompleted)
             {
                 try
                 {
-                    _messageQueue.Add(message);
+                    _messageQueue.Add(queueItems);
                     return;
                 }
                 catch (InvalidOperationException)
@@ -41,7 +49,7 @@ namespace AndWeHaveAPlan.Scriptor
                 }
             }
 
-            WriteMessage(message);
+            WriteMessage(queueItems);
         }
 
         private static void WriteMessage(IEnumerable<QueueItem> message)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using AndWeHaveAPlan.Scriptor.Processing;
 using AndWeHaveAPlan.Scriptor.Scopes;
 using Microsoft.Extensions.Logging;
 
@@ -21,8 +22,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         private static readonly List<Regex> FieldRegex = new List<Regex>
         {
-            new Regex(@"\{\{\s*([a-zA-Z_][\w-_]*)\s*:\s*(.*[^\s])\s*\}\}", RegexOptions.Compiled),
-            new Regex(@"\[\s*([a-zA-Z_][\w-_]*)\s*:\s*(.*[^\s])\s*\]", RegexOptions.Compiled)
+            new Regex(@"\{\s*([\p{L}_]+[\d\p{L}_]*)\s*:\s*("".*""|[^\{^\}]*[^\s]|(?:))\s*\}", RegexOptions.Compiled),
+            new Regex(@"\[\s*([\p{L}_]+[\d\p{L}_]*)\s*:\s*("".*""|[^\[^\]]*[^\s]|(?:))\s*\]", RegexOptions.Compiled)
         };
 
         protected bool UseRfcLevel;
