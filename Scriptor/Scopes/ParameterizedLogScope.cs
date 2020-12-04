@@ -34,7 +34,7 @@ namespace AndWeHaveAPlan.Scriptor.Scopes
 
             foreach (var (key, value) in _items.Skip(1))
             {
-                builder.Append($", {key}:{value}");
+                builder.Append($", {key}: {value}");
             }
 
             return builder.ToString();

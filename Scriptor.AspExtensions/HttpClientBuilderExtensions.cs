@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.DotNet.PlatformAbstractions.Native;
 
 namespace AndWeHaveAPlan.Scriptor.AspExtensions
 {
@@ -45,6 +46,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         public static IHttpClientBuilder AddScriptorScopeForwarding(this IHttpClientBuilder builder, IExternalScopeProvider scopeProvider = null)
         {
             builder.AddHttpMessageHandler(provider => new ScopeHeaderInjectHandler(scopeProvider ?? ScriptorLoggerProvider.DefaultScopeProvider));
+
+            
 
             return builder;
         }

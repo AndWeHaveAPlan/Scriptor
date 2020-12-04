@@ -24,7 +24,7 @@ namespace AndWeHaveAPlan.Scriptor.Scopes
 
         public override string ToString()
         {
-            return $"{Key}:{Value}";
+            return $"{Key}: {Value}";
         }
 
         public static implicit operator ParameterizedLogScopeItem(ValueTuple<string, object> tuple)
