@@ -4,7 +4,8 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- master
+- release
+- dev
 
 pool:
   vmImage: 'windows-latest'
@@ -13,6 +14,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/release')]
 
 steps:
 
@@ -28,15 +30,25 @@ steps:
     command: 'custom'
     projects: '**/*.csproj'
     custom: 'build'
-    arguments: '-c Release'
+    arguments: '-c Release --no-restore'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet pack'
+  displayName: 'dotnet pack release'
+  condition:  and(succeeded(), eq(variables.isMain, true))
   inputs:
     command: 'custom'
     projects: '**/*.csproj'
     custom: 'pack'
     arguments: '-c Release --no-build --no-restore -o ./pkg'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack dev'
+  condition:  and(succeeded(), eq(variables.isMain, false))
+  inputs:
+    command: 'custom'
+    projects: '**/*.csproj'
+    custom: 'pack'
+    arguments: '-c Release --no-build --no-restore -o ./pkg --version-suffix dev'
 
 - task: NuGetCommand@2
   displayName: 'nuget push'
