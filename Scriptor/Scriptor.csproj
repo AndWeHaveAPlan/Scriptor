@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.2.32</Version>
+    <Version>0.2.35</Version>
     <Description>Simple logging library</Description>
     <PackageReleaseNotes>Move scope management to IExternalScopeProvider, downgrade to .net core 2.1</PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor</PackageId>
@@ -12,8 +12,9 @@
     <Company />
     <RepositoryUrl>https://github.com/AndWeHaveAPlan/Scriptor</RepositoryUrl>
     <RepositoryType>gitthub</RepositoryType>
-    <AssemblyVersion>0.2.32.0</AssemblyVersion>
-    <FileVersion>0.2.32.0</FileVersion>
+    <AssemblyVersion>0.2.35.0</AssemblyVersion>
+    <FileVersion>0.2.35.0</FileVersion>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
