@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AndWeHaveAPlan.Scriptor.Processing;
@@ -13,7 +14,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
     /// </summary>
     public abstract class ScriptorLogger : ILogger, ISupportExternalScope
     {
-        private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
+        private readonly ILogProcessor _logProcessor;
         private Func<string, LogLevel, bool> _filter;
 
         public LoggerSettings LoggerSettings = LoggerSettings.Default;
@@ -38,9 +39,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// </summary>
         protected Func<LogMessage, List<QueueItem>> Compose;
 
-        protected ScriptorLogger(string name, IExternalScopeProvider scopeProvider)
+        protected ScriptorLogger(string name, IExternalScopeProvider scopeProvider, ILogProcessor logProcessor)
         {
-            _scopeProvider = scopeProvider;
+            _logProcessor = logProcessor ?? throw new ArgumentException("logProcessor cannot be null", nameof(logProcessor));
+
+            _scopeProvider = scopeProvider ?? new LoggerExternalScopeProvider();
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Filter = (category, logLevel) => true;
 
@@ -112,7 +115,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,
                 Exception = exception?.ToString(),
-                AuxData = Inject?.Invoke(logLevel) ?? new Dictionary<string, string>(),
+                AuxData = Inject?.Invoke(logLevel),
                 EventId = eventId.ToString(),
                 LogName = Name
             };
@@ -128,7 +131,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
             var queueItems = Compose(logMessage);
 
-            QueueProcessor.EnqueueMessage(queueItems);
+            _logProcessor.EnqueueMessage(queueItems);
         }
 
         /// <summary>
@@ -189,7 +192,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             _scopeProvider?.ForEachScope((scopeObj, state) =>
             {
                 if (state.Length != 0)
-                    state.Append("\r\n");
+                    state.Append("\n");
                 state.Append(scopeObj);
             }, stringBuilder);
 
@@ -256,6 +259,9 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         private static LogMessage AddAuxData(LogMessage logMessage, Dictionary<string, object> fields)
         {
+            if (fields.Any() && logMessage.AuxData == null)
+                logMessage.AuxData = new Dictionary<string, string>();
+
             foreach (var (key, value) in fields)
             {
                 logMessage = AddAuxData(logMessage, key, value);

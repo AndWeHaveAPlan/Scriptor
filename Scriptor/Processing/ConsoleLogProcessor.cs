@@ -8,16 +8,15 @@ namespace AndWeHaveAPlan.Scriptor.Processing
 {
     public sealed class ConsoleLogProcessor : IDisposable, ILogProcessor
     {
-        private readonly BlockingCollection<IEnumerable<QueueItem>> _messageQueue = new BlockingCollection<IEnumerable<QueueItem>>(100);
+        private static readonly BlockingCollection<IEnumerable<QueueItem>> MessageQueue = new BlockingCollection<IEnumerable<QueueItem>>(100);
 
-        private readonly Task _outputTask;
+        private static readonly Task OutputTask;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        public ConsoleLogProcessor()
+        public static ILogProcessor GetDefault { get; } = new ConsoleLogProcessor();
+
+        static ConsoleLogProcessor()
         {
-            _outputTask = Task.Factory.StartNew(
+            OutputTask = Task.Factory.StartNew(
                 ProcessLogQueue,
                 null,
                 TaskCreationOptions.LongRunning);
@@ -36,11 +35,11 @@ namespace AndWeHaveAPlan.Scriptor.Processing
         {
             var queueItems = message as QueueItem[] ?? message.ToArray();
 
-            if (!_messageQueue.IsAddingCompleted)
+            if (!MessageQueue.IsAddingCompleted)
             {
                 try
                 {
-                    _messageQueue.Add(queueItems);
+                    MessageQueue.Add(queueItems);
                     return;
                 }
                 catch (InvalidOperationException)
@@ -52,6 +51,10 @@ namespace AndWeHaveAPlan.Scriptor.Processing
             WriteMessage(queueItems);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
         private static void WriteMessage(IEnumerable<QueueItem> message)
         {
             foreach (var queueItem in message)
@@ -69,9 +72,9 @@ namespace AndWeHaveAPlan.Scriptor.Processing
             Console.WriteLine();
         }
 
-        private void ProcessLogQueue(object state)
+        private static void ProcessLogQueue(object state)
         {
-            foreach (var message in _messageQueue.GetConsumingEnumerable())
+            foreach (var message in MessageQueue.GetConsumingEnumerable())
             {
                 WriteMessage(message);
             }
@@ -80,10 +83,10 @@ namespace AndWeHaveAPlan.Scriptor.Processing
 
         public void Dispose()
         {
-            _messageQueue.CompleteAdding();
+            MessageQueue.CompleteAdding();
             try
             {
-                _outputTask.Wait(1500); // with timeout in-case Console is locked by user input
+                OutputTask.Wait(1500); // with timeout in-case Console is locked by user input
             }
             catch (TaskCanceledException) { }
             catch (AggregateException ex) when (ex.InnerExceptions.Count == 1 && ex.InnerExceptions[0] is TaskCanceledException) { }
