@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <VersionPrefix>0.2.35</VersionPrefix>
+    <VersionPrefix>0.2.36</VersionPrefix>
     <Description>Asp.net extensions for Scriptor</Description>
     <PackageReleaseNotes>Move scope management to IExternalScopeProvider, downgrade to .net core 2.1</PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor.AspExtensions</PackageId>

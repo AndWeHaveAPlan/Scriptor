@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <VersionPrefix>0.2.35</VersionPrefix>
+    <VersionPrefix>0.2.36</VersionPrefix>
     <Description>Simple logging library</Description>
     <PackageReleaseNotes>Move scope management to IExternalScopeProvider, downgrade to .net core 2.1</PackageReleaseNotes>
     <PackageId>AndWeHaveAPlan.Scriptor</PackageId>

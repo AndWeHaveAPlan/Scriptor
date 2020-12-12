@@ -233,6 +233,9 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             {
                 switch (scopeObj)
                 {
+                    case ValueTuple<string, object> tuple:
+                        resultDictionary[tuple.Item1] = tuple.Item2;
+                        break;
                     case ParameterizedLogScopeItem scopeItem:
                         resultDictionary[scopeItem.Key] = scopeItem.Value;
                         break;

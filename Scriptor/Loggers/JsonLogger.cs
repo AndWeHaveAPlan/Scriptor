@@ -36,7 +36,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
             result.Add(new QueueItem
             {
-                String = jObject.ToString(Formatting.Indented)
+                String = jObject.ToString(Formatting.None)
             });
 
             return result;
