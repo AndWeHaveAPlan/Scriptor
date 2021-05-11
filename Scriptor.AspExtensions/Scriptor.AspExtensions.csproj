@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netcoreapp2.1</TargetFramework>
-		<VersionPrefix>0.2.38</VersionPrefix>
+		<VersionPrefix>0.2.39</VersionPrefix>
 		<Description>Asp.net extensions for Scriptor</Description>
 		<PackageId>AndWeHaveAPlan.Scriptor.AspExtensions</PackageId>
 		<Authors>Eugen Snitko</Authors>

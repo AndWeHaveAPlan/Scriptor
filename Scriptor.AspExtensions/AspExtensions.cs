@@ -98,19 +98,18 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         private static async Task ScopeForwardedHeaders(HttpContext context, Func<Task> next)
         {
             var parsed = Scope.GetScopeFromHeaders(context?.Request?.Headers);
+            List<(string, object)> forwardedParams = new List<(string, object)>();
 
             if (parsed != null)
             {
-                List<(string, object)> forwardedParams = new List<(string, object)>();
-
                 forwardedParams.AddRange(parsed.Select(pair =>
                 {
                     var (key, value) = pair;
                     return (key, value as object);
                 }));
-
-                await CreateScope(context, next, forwardedParams);
             }
+
+            await CreateScope(context, next, forwardedParams);
         }
 
         /// <summary>
