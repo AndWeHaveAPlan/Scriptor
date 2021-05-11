@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AndWeHaveAPlan.Scriptor.AspExtensions.Providers;
+using AndWeHaveAPlan.Scriptor.AspExtensions.Tools;
 using AndWeHaveAPlan.Scriptor.Loggers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -95,21 +97,20 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         /// <returns></returns>
         private static async Task ScopeForwardedHeaders(HttpContext context, Func<Task> next)
         {
-            string scopeHeader = context?.Request?.Headers["Scriptor-ForwardedScope"].ToString();
-            List<(string, object)> forwardedParams = new List<(string, object)>();
+            var parsed = Scope.GetScopeFromHeaders(context?.Request?.Headers);
 
-
-            if (!string.IsNullOrWhiteSpace(scopeHeader))
+            if (parsed != null)
             {
-                var parsed = JsonConvert.DeserializeObject<Dictionary<string, string>>(scopeHeader);
+                List<(string, object)> forwardedParams = new List<(string, object)>();
+
                 forwardedParams.AddRange(parsed.Select(pair =>
                 {
                     var (key, value) = pair;
                     return (key, value as object);
                 }));
-            }
 
-            await CreateScope(context, next, forwardedParams);
+                await CreateScope(context, next, forwardedParams);
+            }
         }
 
         /// <summary>
@@ -123,7 +124,6 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         {
             var requestHeaders = context?.Request?.Headers;
             List<(string, object)> scopeParams = new List<(string, object)>();
-
 
             if (requestHeaders != null)
             {

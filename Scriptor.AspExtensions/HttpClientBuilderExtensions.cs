@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AndWeHaveAPlan.Scriptor.AspExtensions.Providers;
@@ -47,7 +48,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         {
             builder.AddHttpMessageHandler(provider => new ScopeHeaderInjectHandler(scopeProvider ?? ScriptorLoggerProvider.DefaultScopeProvider));
 
-            
+
 
             return builder;
         }
@@ -68,7 +69,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var scopeParams = ScriptorLogger.ExtractFieldFromScope(_scopeProvider);
-            request.Headers.Add("Scriptor-ForwardedScope", JsonConvert.SerializeObject(scopeParams));
+
+            Tools.Scope.SetScopeToHeader(request.Headers, scopeParams);
 
             return base.SendAsync(request, cancellationToken);
         }
