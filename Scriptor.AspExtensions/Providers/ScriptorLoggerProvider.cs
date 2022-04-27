@@ -11,7 +11,6 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
 {
     public class ScriptorLoggerProvider : ILoggerProvider
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ScriptorOptions _options;
         private readonly bool _useJson;
         private readonly (string key, string value)[] _headers;
@@ -22,9 +21,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions.Providers
         {
         }
 
-        public ScriptorLoggerProvider(IHttpContextAccessor httpContextAccessor, ScriptorOptions options)
+        public ScriptorLoggerProvider(ScriptorOptions options)
         {
-            _httpContextAccessor = httpContextAccessor;
             _options = options;
             _useJson = options?.Json == true;
 

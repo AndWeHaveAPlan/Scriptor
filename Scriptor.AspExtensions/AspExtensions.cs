@@ -31,14 +31,8 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
             optionsAction?.Invoke(options);
 
             builder
-                .ConfigureServices(services =>
-                {
-                    services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-                })
                 .ConfigureLogging(logBuilder =>
                 {
-                    var accessor = logBuilder.Services.BuildServiceProvider().GetRequiredService<IHttpContextAccessor>();
-
                     if (options.OnlyScriptor)
                         logBuilder.ClearProviders();
 
@@ -49,10 +43,7 @@ namespace AndWeHaveAPlan.Scriptor.AspExtensions
                         logBuilder.AddFilter("Microsoft", options.AspMinLogLevel);
                     }
 
-                    logBuilder.AddProvider(new ScriptorLoggerProvider(accessor, options));
-                }).Configure(applicationBuilder =>
-                {
-                    //applicationBuilder.use
+                    logBuilder.AddProvider(new ScriptorLoggerProvider(options));
                 });
 
             if (options.OnlyScriptor)
