@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AndWeHaveAPlan.Scriptor.Processing;
+using AndWeHaveAPlan.Scriptor.Scopes;
 using Microsoft.Extensions.Logging;
 
 namespace AndWeHaveAPlan.Scriptor.Loggers
@@ -11,7 +14,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
     /// </summary>
     public abstract class ScriptorLogger : ILogger, ISupportExternalScope
     {
-        private static readonly ConsoleLogProcessor QueueProcessor = new ConsoleLogProcessor();
+        private readonly ILogProcessor _logProcessor;
         private Func<string, LogLevel, bool> _filter;
 
         public LoggerSettings LoggerSettings = LoggerSettings.Default;
@@ -20,8 +23,8 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
         private static readonly List<Regex> FieldRegex = new List<Regex>
         {
-            new Regex(@"\{\{\s*([\w-]*):\s*(.*[^\s])\s*\}\}", RegexOptions.Compiled),
-            new Regex(@"\[\s*([\w-]*):\s*(.*[^\s])\s*\]", RegexOptions.Compiled)
+            new Regex(@"\{\s*([\p{L}_]+[\d\p{L}_]*)\s*:\s*("".*""|[^\{^\}]*[^\s]|(?:))\s*\}", RegexOptions.Compiled),
+            new Regex(@"\[\s*([\p{L}_]+[\d\p{L}_]*)\s*:\s*("".*""|[^\[^\]]*[^\s]|(?:))\s*\]", RegexOptions.Compiled)
         };
 
         protected bool UseRfcLevel;
@@ -36,9 +39,11 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// </summary>
         protected Func<LogMessage, List<QueueItem>> Compose;
 
-        protected ScriptorLogger(string name, IExternalScopeProvider scopeProvider)
+        protected ScriptorLogger(string name, IExternalScopeProvider scopeProvider, ILogProcessor logProcessor)
         {
-            _scopeProvider = scopeProvider;
+            _logProcessor = logProcessor ?? throw new ArgumentException("logProcessor cannot be null", nameof(logProcessor));
+
+            _scopeProvider = scopeProvider ?? new LoggerExternalScopeProvider();
             Name = name ?? throw new ArgumentNullException(nameof(name));
             Filter = (category, logLevel) => true;
 
@@ -57,7 +62,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <summary>
         /// 
         /// </summary>
-        public bool IncludeScopes => _scopeProvider != null;
+        public bool IncludeScopes => true;
 
         /// <summary>
         /// 
@@ -90,7 +95,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
 
             if (!string.IsNullOrEmpty(message) || exception != null)
             {
-                WriteMessage(logLevel, Name, eventId.Id, message, exception);
+                WriteMessage(logLevel, eventId.Id, message, exception);
             }
         }
 
@@ -98,11 +103,10 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// 
         /// </summary>
         /// <param name="logLevel"></param>
-        /// <param name="logName"></param>
         /// <param name="eventId"></param>
         /// <param name="message"></param>
         /// <param name="exception"></param>
-        private void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
+        private void WriteMessage(LogLevel logLevel, int eventId, string message, Exception exception)
         {
             var logMessage = new LogMessage
             {
@@ -111,17 +115,23 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
                 Level = UseRfcLevel ? GetLogLevelRfcNumber(logLevel) : (int)logLevel,
                 Message = message,
                 Exception = exception?.ToString(),
-                AuxData = Inject?.Invoke(logLevel)
+                AuxData = Inject?.Invoke(logLevel),
+                EventId = eventId.ToString(),
+                LogName = Name
             };
 
-            logMessage = ExtractField(logMessage);
+            var scopeFields = ExtractFieldFromScope(_scopeProvider);
+            logMessage = AddAuxData(logMessage, scopeFields);
+
+            var messageFields = ExtractFieldFromMessage(logMessage);
+            logMessage = AddAuxData(logMessage, messageFields);
 
             if (IncludeScopes)
                 logMessage.Scope = GetScopeInformation();
 
             var queueItems = Compose(logMessage);
 
-            QueueProcessor.EnqueueMessage(queueItems);
+            _logProcessor.EnqueueMessage(queueItems);
         }
 
         /// <summary>
@@ -171,13 +181,6 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
         /// <returns></returns>
         public IDisposable BeginScope<TState>(TState state)
         {
-            /*
-            if (state == null)
-            {
-                throw new ArgumentNullException(nameof(state));
-            }
-            return ConsoleLogScope.Push(Name, state);*/
-
             var scope = _scopeProvider?.Push(state);
             return scope;
         }
@@ -189,7 +192,7 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             _scopeProvider?.ForEachScope((scopeObj, state) =>
             {
                 if (state.Length != 0)
-                    state.Append("\r\n");
+                    state.Append("\n");
                 state.Append(scopeObj);
             }, stringBuilder);
 
@@ -197,30 +200,74 @@ namespace AndWeHaveAPlan.Scriptor.Loggers
             return stringBuilder.ToString();
         }
 
-        private static LogMessage ExtractField(LogMessage logMessage)
+        private static Dictionary<string, object> ExtractFieldFromMessage(LogMessage logMessage)
         {
             List<Match> matches = new List<Match>();
+
+            var resultDictionary = new Dictionary<string, object>();
 
             foreach (var regex in FieldRegex)
             {
                 matches.AddRange(regex.Matches(logMessage.Message));
             }
 
-            if (matches.Count > 0 && logMessage.AuxData == null)
-                logMessage.AuxData = new Dictionary<string, string>();
+            //if (matches.Count > 0 && logMessage.AuxData == null)
+            //logMessage.AuxData = new Dictionary<string, string>();
 
             foreach (Match match in matches)
             {
                 var key = match.Groups[1].Value;
                 var value = match.Groups[2].Value;
-                if (logMessage.AuxData.ContainsKey(key))
+                //logMessage = AddAuxData(logMessage, key, value);
+                resultDictionary[key] = value;
+            }
+
+            return resultDictionary;
+        }
+
+        public static Dictionary<string, object> ExtractFieldFromScope(IExternalScopeProvider scopeProvider)
+        {
+            var result = new Dictionary<string, object>();
+
+            scopeProvider.ForEachScope((scopeObj, resultDictionary) =>
+            {
+                switch (scopeObj)
                 {
-                    logMessage.AuxData[key] = value;
+                    case ValueTuple<string, object> tuple:
+                        resultDictionary[tuple.Item1] = tuple.Item2;
+                        break;
+                    case ParameterizedLogScopeItem scopeItem:
+                        resultDictionary[scopeItem.Key] = scopeItem.Value;
+                        break;
+                    case ParameterizedLogScope scope:
+                        foreach (var (key, value) in scope)
+                            resultDictionary[key] = value;
+                        break;
+
                 }
-                else
-                {
-                    logMessage.AuxData.Add(key, value);
-                }
+            }, result);
+
+            return result;
+        }
+
+        private static LogMessage AddAuxData(LogMessage logMessage, string key, object value)
+        {
+            if (logMessage.AuxData.ContainsKey(key))
+                logMessage.AuxData[key] = value.ToString();
+            else
+                logMessage.AuxData.Add(key, value.ToString());
+
+            return logMessage;
+        }
+
+        private static LogMessage AddAuxData(LogMessage logMessage, Dictionary<string, object> fields)
+        {
+            if (fields.Any() && logMessage.AuxData == null)
+                logMessage.AuxData = new Dictionary<string, string>();
+
+            foreach (var (key, value) in fields)
+            {
+                logMessage = AddAuxData(logMessage, key, value);
             }
 
             return logMessage;

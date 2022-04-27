@@ -1,28 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Version>0.2.32</Version>
-    <Description>Asp.net extensions for Scriptor</Description>
-    <AssemblyVersion>0.2.32.0</AssemblyVersion>
-    <FileVersion>0.2.32.0</FileVersion>
-    <PackageReleaseNotes>Move scope management to IExternalScopeProvider, downgrade to .net core 2.1</PackageReleaseNotes>
-    <PackageId>AndWeHaveAPlan.Scriptor.AspExtensions</PackageId>
-    <Authors>Eugen Snitko</Authors>
-    <Company />
-    <Product>AndWeHaveAPlan.Scriptor.AspExtensions</Product>
-    <AssemblyName>AndWeHaveAPlan.Scriptor.AspExtensions</AssemblyName>
-    <RootNamespace>AndWeHaveAPlan.Scriptor.AspExtensions</RootNamespace>
-    <RepositoryUrl>https://github.com/AndWeHaveAPlan/Scriptor</RepositoryUrl>
-    <RepositoryType>github</RepositoryType>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp2.1</TargetFramework>
+		<VersionPrefix>0.2.40</VersionPrefix>
+		<Description>Asp.net extensions for Scriptor</Description>
+		<PackageId>AndWeHaveAPlan.Scriptor.AspExtensions</PackageId>
+		<Authors>Eugen Snitko</Authors>
+		<Company />
+		<Product>AndWeHaveAPlan.Scriptor.AspExtensions</Product>
+		<AssemblyName>AndWeHaveAPlan.Scriptor.AspExtensions</AssemblyName>
+		<RootNamespace>AndWeHaveAPlan.Scriptor.AspExtensions</RootNamespace>
+		<RepositoryUrl>https://github.com/AndWeHaveAPlan/Scriptor</RepositoryUrl>
+		<RepositoryType>github</RepositoryType>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Scriptor\Scriptor.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Scriptor\Scriptor.csproj" />
+	</ItemGroup>
 
 </Project>

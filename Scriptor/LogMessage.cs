@@ -25,5 +25,11 @@ namespace AndWeHaveAPlan.Scriptor
 
         [JsonProperty("timestamp")]
         public string Timestamp;
+
+        [JsonProperty("log_name")]
+        public string LogName;
+
+        [JsonProperty("event_id")]
+        public string EventId;
     }
 }
